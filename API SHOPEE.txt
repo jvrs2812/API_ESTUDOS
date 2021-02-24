@@ -14,7 +14,9 @@ URL de requsição padrão : https://partner.shopeemobile.com/api/v1
 
 URL de requsição padrão TESTE : https://partner.uat.shopeemobile.com/api/v1
 
-<b> Ficar atento, Toda requisição e do metodo POST </b>
+////////////////////////////////////////////////////////////////
+/////Ficar atento, Toda requisição e do metodo POST/////////////
+////////////////////////////////////////////////////////////////
 
 --------------------------------------Categorias------------------------------------------------------
 METODO = POST
