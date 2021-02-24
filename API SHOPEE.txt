@@ -178,3 +178,32 @@ URL TESTE = https://partner.uat.shopeemobile.com/api/v1/payment/get_payout_detai
    pagination_offset (Required) = Specifies the starting entry of data to return in the current call. Default is 0. if data is more than one page, the offset can be some entry to start next call.
    pagination_entries_per_page (Required) = If many records are available to retrieve, you may need to call this API multiple times to retrieve all the data. Each result set is returned as a page of entries. Use the Pagination filters to control the maximum number of entries (<= 100) to retrieve per page (i.e., per call), the offset number to start next call. This integer value is usUed to specify the maximum number of entries to return in a single ""page"" of data.   
 
+------------------------------------------------------------------------------------------------------------
+-------------------------Pergunta do produto----------------------------------------------------------------
+METODO = POST
+URL = https://partner.shopeemobile.com/api/v1/items/comments/get
+URL TESTE = https://partner.uat.shopeemobile.com/api/v1/items/comments/get
+
+   -------Parametros--------
+   partner_id (Required) = Partner ID is assigned upon registration is successful. Required for all requests.
+   shopid (Required) = Shopee's unique identifier for a shop. Required for all requests.
+   item_id = The identity of product item.
+   cmt_id = The identity of comment.
+   pagination_offset (Required) = Specifies the starting entry of data to return in the current call. Default is 0. if data is more than one page, the offset can be some entry to start next call.
+   pagination_entries_per_page (Required) = If many items are available to retrieve, you may need to call GetItemsList multiple times to retrieve all the data. Each result set is returned as a page of entries. Use the Pagination filters to control the maximum number of entries (<= 100) to retrieve per page (i.e., per call), the offset number to start next call. This integer value is usUed to specify the maximum number of entries to return in a single ""page"" of data.
+   timestamp (Required) = This is to indicate the timestamp of the request. Required for all requests.
+   
+-------------------------------------------------------------------------------------------------------------
+
+---------------------Responder Pergunta----------------------------------------------------------------------
+METODO = POST
+URL = https://partner.shopeemobile.com/api/v1/items/comments/reply
+URL TESTE = https://partner.uat.shopeemobile.com/api/v1/items/comments/reply
+
+      ----------------Parametros----------
+      partner_id (Required) = Partner ID is assigned upon registration is successful. Required for all requests.
+      shopid (Required) = Shopee's unique identifier for a shop. Required for all requests.
+      timestamp (Required) = This is to indicate the timestamp of the request. Required for all requests.
+      cmt_list = [ cmt_id (Required) = The identity of comment. , comment (Required) = Content of the comment. ]
+      
+----------------------------------------------------------------------------------------------------------------
