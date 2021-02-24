@@ -2,6 +2,6 @@
 
 Respóstorio para estudo das API de e-commerce para a implementação no sistema integrador.
 
-Precisa de um sistema ERP que integre com os mais variados marketplaces ? 
+<b>Precisa de um sistema ERP que integre com os mais variados marketplaces ? </b>
 
 http://sistemas-tmi.com.br/
