@@ -1,0 +1,161 @@
+-----------------------------Token------------------------------------------------------------------
+a cada requisição será necessario um token;
+
+o Token deve ser enviado no header da requisição 
+exemplo : 'Authorization : Codificado na base64(Token)'
+
+para criar o token Usuário e senha devem ser combinados em uma string "usuario:senha"
+
+Como a API Marketplace B2W só considera o usuário, a senha deve ficar em branco "VALOR_API_KEY:"
+
+----------------------------------------------------------------------------------------------------
+
+-------------------------Padrões e convenções-------------------------------------------------------
+
+END POINT PADRAO : http://api-marketplace.bonmarketplace.com.br/{QUALQUER SEGUIMENTO DA API}
+
+{QUALQUER SEGUIMENTO DA API} : Sempre será em letras minusculas
+
+
+- Modelo de arquitetura: REST*
+- Protocolo: HTTP 1.1
+- Charset: UTF-8
+- Content-type: JSON**
+- Formatação de data: yyyy-mm-dd
+- Formatação de data/hora: yyyy-mm-dd HH:MM:SS
+
+
+Para obter resultados paginados ou então para especificar a faixa de registros a serem retornados pela API, o consumidor deverá informar dois parâmetros:
+
+*limit: quantidade de registros resultados a serem retornados ao consumidor.
+O valor default é 50 e o valor máximo permitido também ������ 50. Caso o consumidor passe um valor maior que 50, automaticamente a API sobrescreverá o valor pelo máximo permitido.
+
+*offset: indica a primeira posição da coleção de registros que será retornada ao consumidor.
+
+*Exemplo de busca utilizando limit e offset:
+    GET http://api-marketplace.bonmarketplace.com.br/product?limit=25&offset=50
+
+No exemplo acima, a API Marketplace irá retornar um total de 25 produtos, começando a partir do produto que está na posição de número 50, ou seja, irá recuperar todos os produtos no intervalo 50-75.
+
+------------------------------------------------------------------------------------------------------
+
+-------------------------------Recursos---------------------------------------------------------------
+
+*PRODUCT -> um PRODUCT é um agrupador de um ou mais itens (variações ou SKUs). Dentro dele estão todas as informações relacionadas ao produto e que são comuns às suas variações (como, por exemplo, nome do fabricante).
+
+*PRODUCT.SKU -> representa as variações de um produto (PRODUCT) e é a entidade que será vendável no catálogo dos sites da B2W. É nesse recurso que estarão presentes informações como preço, status, quantidade disponível em estoque e dimensões do produto. Um mesmo produto (PRODUCT) pode ter N variações (SKU), ficando a cargo do parceiro Marketplace cadastrar quantas variações do mesmo produto achar necessário.
+
+*SKU.PRICE -> recurso que conterá as informações de preço (preço de, preço por) de um SKU.
+
+*SKU.STOCK -> recurso que conterá as informações de estoque de um SKU. Caso o parceiro atualize essa quantidade, a quantidade atual em estoque sempre será sobrescrita.
+
+*SKU.STATUS -> o status representa se um SKU do parceiro Marketplace está vendável ou não no catálogo dos sites da B2W.
+
+*ORDER -> recurso que representa um pedido feito por um cliente B2W para um parceiro Marketplace.
+
+*ORDER.STATUS -> recurso que representa o status atual de um pedido específico de um parceiro Marketplace. Um pedido pode ter até 9 status, mas nunca mais de um status ao mesmo tempo.
+  **NEW - Pedidos novos
+  **APPROVED - Pedido aprovado (pagamento OK)
+  **CANCELED - Pedido cancelado
+  **PROCESSING - Pedido aguardando emissão de nota fiscal
+  **INVOICED - Pedido aguardando expedição
+  **SHIPPED - Pedido aguardando entrega
+  **DELIVERED - Pedido entregue
+  **UNAVAILABLE - Pedido sem estoque
+  **SHIPMENT_EXCEPTION - Pedido com exceção de transporte
+  **NOT_APPROVED - Pedido com boleto de débito vencido
+
+------------------------------------------------------------------------------------------------------
+
+---------------------------Fluxo de informação--------------------------------------------------------
+
+             -------------Produto-----------------
+        P   -- Cadastro de produto Sku----------->  B
+        A   -- Consulta produtos e Skus---------->  2 
+        R   -- Envio de preço/estoque unitario--->  W
+        C   -- Envio de preço/estoque(batch)----->
+        E   -- Consulta batch preço/estoque------>  A 
+        I   -- Atualização de status------------->  P
+        R   ---------------Frete------------------  I
+        O   <-------- Consulta preço--------------
+            <-------- E prazo na plataforma-------
+            <-------- ou gateway de frete---------
+            --------------Pedido------------------
+            ------Consulta de pedido por status-->
+            <-----Consulta de estoque para--------
+            <-----Reserva de pedido---------------
+            --------------Trancking---------------
+            <-----Notificação de pedido***--------
+            -----Atualização de status do pedido->
+
+------------------------------------------------------------------------------------------------------
+
+---------------------------------SandBox--------------------------------------------------------------
+
+*SandBox: nada mais é que um ambiente de teste para parceiros, sem que eles afete os dados reais do sistema, tornando mais seguro a implementação do sistema
+
+*Versões e Recursos: Todos os recursos da API Marketplace estarão também disponíveis no ambiente de Sandbox, na última versão e versões anteriores. Isto significa que será possível realizar testes ou validações utilizando versões anteriores de cada serviço.
+
+*Dados: os servidores de teste são reiniciados periodicamente, não garantindo permanencia dos dados por periodos muito longos
+
+*Autenticação: Para utilizar o ambiente de Sandbox, também será necessário que o parceiro Marketplace identifique suas ações através do token de autenticação, a diferença é que existe um token (API_KEY) específico para o ambiente de Sandbox.
+
+*Endpoint: Para acessar o ambiente de Sandbox, o parceiro Marketplace deverá usar o mesmo padrão de URLs descrito na página de padrões e convenções, entretanto deverá substituir a versão do recurso pelo path do endpoint de Sandbox.
+    ** Exemplo: 
+         Dessa maneira a URL do ambiente de Sandbox ficará como:
+                 http://api-sandbox.bonmarketplace.com.br/recurso
+
+*Api Explorer: O API Explorer é uma ferramenta onde o parceiro Marketplace terá visibilidade de todos os recursos disponíves na API, além de uma definição detalhada das interfaces de cada recurso.
+  Através do API Explorer o parceiro Marketplace também poderá realizar testes, diretamente no ambiente de Sandbox, por meio de uma interface gráfica, sem que seja necessário implementar códigos ou clientes para acessar a API Marketplace. Link: https://api-docs.skyhub.com.br/
+
+------------------------------------------------------------------------------------------------------
+
+---------------------------------------WebHook--------------------------------------------------------
+
+*O Marketplace disponibiliza a funcionalidade de Notificação de Eventos: sempre que um Evento ocorrer (por exemplo um novo pedido), iremos notificar a sua Aplicação
+
+*Para integrar seu sistema e aproveitar ao máximo os recursos de notificações, é necessário que sua aplicação esteja preparada para receber um POST de um JSON no formato:
+
+        {
+             "eventDate" : "2014-10-13T02:42:00.000-03:00",
+             "notificationType" : "PEDIDOS",
+             "resourceId" : "5",
+             "resourceStatus" : "INCLUIDO",
+             "resourceUri" : "/orders/5"
+        }
+
+
+*É o endereço que será chamado pelo marketplace da B2W para notificar o parceiro marketplace que ocorreu algo novo no sistema. Se resume ao endereço de um serviço rest que a aplicação desenvolvida pelo parceiro saberá interpretar. Todas as chamadas deverão ter suporte ao método POST e deverão retornar o status 200 ou 201 em caso de sucesso na requisição.
+
+*Para cadastro da URL de notificação, abrir um chamado no e-mail parceiro.marketplace@b2wdigital.com e envie no assunto: [B2W-API-CONFIG-NOTIFICACAO] informando a URL de notificação no corpo do e-mail.
+
+*Tipos de Notificação: Após o cadastro correto da url de retorno, sempre notificaremos o seu sistema nos seguintes pontos, com os respectivos resourceStatus:
+  ______________________________________________________
+ |                     Tipo    |   resourceStatus       |
+ |______________________________________________________|
+ |           Pedido Incluido   |  INCLUIDO              |
+ |          Pagamento Aprovado |  APROVADO              |
+ |  Pedido Reprovado/Cancelado | CANCELADO              |
+  ______________________________________________________
+
+*Situações de Exceção: Ocorrerão até 5 tentativas de notificação, em intervalos regulares. Se em nenhuma delas o sistema da B2W receber código esperado, a notificação será armazenada como não entregue e será cancelada. Todos os históricos das chamadas são armazenados por até 60 dias e poderão ser disponibilizados caso solicitado. É recomendado que o sistema do parceiro consulte os serviços em intervalos regulares, não inferiores á 30 minutos, para checar se existe algum novo recurso disponível, pedido realizado, pagamento aprovado, etc. Por convenção, as notificações não possuem todos os detalhes de uma transação, necessitando assim a chamada aos respectivos serviços relacionados.
+------------------------------------------------------------------------------------------------------
+
+---------------------------------Confirmação do pedido------------------------------------------------
+
+*O Marketplace disponibiliza o serviço de confirmação de pedido, que consiste em perguntar ao parceiro (sistematicamente) a cada novo pedido na B2W, se existe estoque para os itens do pedido. Esse recurso é recomendado para aqueles produtos e/ou serviços que requerem confirmação de estoque.
+
+*Caso o parceiro confirme a disponibilidade de estoque, a B2W irá reduzir internamente o estoque dos items associados ao pedido, conforme a quantidade de cada item, e o pedido continuará o fluxo normal; caso contrario o pedido será cancelado. Para isto o parceiro deverá implementar um serviço de reposta para a confirmação de pedido.
+
+*Atenção - O indicador de pedidos cancelados deverá ser o menor possível e o parceiro/lojista poderá ser penalizado conforme contrato de parceria firmado com a B2W.
+
+*Como funciona:
+   Síncrona: Para isto o parceiro deve implementar um Webservice REST que use formato JSON. Este    serviço será responsável por receber as requisições de novos pedidos vindos da B2W, e o parceiro     deverá responder se tem estoque ou não para os itens do pedido. Caso o pedido seja liberado pelo    parceiro, a B2W irá reduzir internamente o estoque dos items associados ao pedido, conforme a       quantidade de cada item.
+   Requisição REST:
+        A requisição que o pareiro irá receber por método POST terá o seguinte formato:
+
+         - HTTP Method: POST
+         - HTTP Header: Content-Type: application/json;charset=UTF-8
+         - JSON Request: Os campos do JSON são os mesmos do schema do recurso ORDER, descritos na               documentação da API do Marketplace
+         (http://api-sandbox.bonmarketplace.com.br/docs/explorer.shtml/#!/order/getOrder_get_1)
+
